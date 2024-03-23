@@ -22,6 +22,10 @@
 #include "utils/urlencode.h"
 #include "version.h"
 
+
+#include <chrono>
+#include <thread>
+
 //#include "vfs.h"
 
 WebServer webServer;
@@ -113,16 +117,6 @@ void cron_tick_caller()
         cron_tick();
 }
 
-
-// 3秒钟退出程序
-void exit_route_call(RESPONSE_CALLBACK_ARGS)
-{
-    response.status_code = 200;
-    response.mime_type = "text/plain";
-    return "程序将在3秒后退出！";
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-    exit(0);
-}
 
 
 int main(int argc, char *argv[])
@@ -287,8 +281,20 @@ int main(int argc, char *argv[])
     webServer.append_response("GET", "/render", "text/plain;charset=utf-8", renderTemplate);
 
 
-// 3秒钟退出程序
-    webServer.append_response("GET", "/exit", "text/plain;charset=utf-8", exit_route_call);
+
+    // 3秒钟退出程序
+    webServer.append_response("GET", "/exit", "text/plain;charset=utf-8", [](RESPONSE_CALLBACK_ARGS) -> std::string
+    {    
+        // Create a detached thread that sleeps for 3 seconds then exits the program 
+        std::thread([](){
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+            exit(0);
+        }).detach();
+
+        // Immediately response to the request
+        return "程序将在3秒后退出!";
+    });
+
 
 
 
