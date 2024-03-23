@@ -48,7 +48,7 @@ jobs:
         prerelease: false
         draft: false
         artifacts: "*.zip,*.tar.gz"
-        tag: "build-macos-x64_84"
+        tag: "v0.9.3"
         token: ${{ secrets.GITHUB_TOKEN }}    
 
 

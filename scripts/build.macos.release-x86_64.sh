@@ -75,7 +75,7 @@ cd ..
 mv base subconverter
 
 
-## 打包
-zip -r subconverter_darwin_x86_64.zip ./subconverter
+# ## 打包
+# zip -r subconverter_darwin_x86_64.zip ./subconverter
 
 set +xe
