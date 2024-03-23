@@ -1,0 +1,56 @@
+name: GitHub CI
+on: 
+  push:
+    branches: [master, main]
+
+
+
+
+
+jobs:
+  macos_build_x86_64:
+    name: macOS Build 
+    if: contains(github.event.head_commit.message, 'build-macos')
+    # runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-12]
+        arch: [x86_64]
+        swift: ["5.7.0"]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Add commit id into version
+      run: SHA=$(git rev-parse --short HEAD) && sed -i -e 's/\(v[0-9]\.[0-9]\.[0-9]\)/\1-'"$SHA"'/' src/version.h
+    - name: Build
+      run: bash scripts/build.macos.release-x86_64.sh
+    # - name: Upload
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: subconverter_darwin_x86_64
+    #     path: subconverter/
+    - name: Package Release
+      run: tar czf subconverter_darwin_x86_64.tar.gz subconverter
+    # - name: Update Release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     files: subconverter_darwin_x86_64.tar.gz
+    #     draft: true
+    - name: Update Release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        replacesArtifacts: true
+        prerelease: false
+        draft: false
+        artifacts: "*.zip,*.tar.gz"
+        tag: "build-macos-x64_84"
+        token: ${{ secrets.GITHUB_TOKEN }}    
+
+
+
+  
